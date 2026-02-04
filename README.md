@@ -30,6 +30,8 @@ The repository is organized following professional modular standards:
 *   **Libraries**: `scikit-learn` (TruncatedSVD) for matrix decomposition, `pandas` & `numpy` for vectorized operations, `matplotlib` & `seaborn` for financial visualization.
 *   **Architecture**: Object-Oriented Programming (OOP) to ensure modularity and easy integration of alternative models (e.g., KNN or Deep Learning Autoencoders).
 
+---
+
 **Career Objective**: Aspiring Quantitative Researcher / Developer. Currently seeking an internship in Quantitative Finance starting in Fall 2026.
 
 **Contact**: Maéva Cavaleri - cavalerimaeva@gmail.com
