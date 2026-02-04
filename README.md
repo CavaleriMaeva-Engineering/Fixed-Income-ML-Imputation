@@ -1,99 +1,35 @@
-# Fixed-Income ML Imputation : Spreads High Yield & Analyse de Valeur Relative
+**Fixed-Income-ML-Imputation**  
+Implementation of a Matrix Factorization engine for High Yield bond spread imputation and Relative Value analysis.
 
-**Auteur :** Maéva Cavaleri (Télécom SudParis)  
+### 1. Presentation
 
----
-## Présentation du Projet
+This project was developed during my second year at Télécom SudParis as part of **Project Cassiopée**, a specialized module in Quantitative Finance. The objective of this library is to address the structural illiquidity of the High Yield bond market by using Machine Learning to reconstruct missing OAS (Option-Adjusted Spread) data and build a Relative Value monitoring tool.
 
-Le marché des obligations **High Yield** (notées en dessous de BBB-) est structurellement marqué par une forte **illiquidité**. Contrairement aux actions, ces titres ne s'échangent pas quotidiennement, ce qui génère des "trous" (données manquantes) dans les séries temporelles de spreads **OAS (Option-Adjusted Spread)**.
+### 2. Theoretical Framework
 
-Ce projet propose une solution basée sur l'Apprentissage Automatique pour :
-1. **Simuler un univers obligataire réaliste** avec des composantes de marché, de secteur et de risque idiosyncratique.
-2. **Imputer les données manquantes** à l'aide d'un algorithme de **Matrix Factorization (SVD Itérative)** capable de capturer les facteurs latents du marché.
-3. **Identifier des opportunités d'arbitrage** via une stratégie de **Relative Value (Rich/Cheap)** en comparant le prix de marché observé à la "Fair Value" reconstruite par l'IA.
+The High Yield market is characterized by sparse trading data, resulting in significant gaps in time series. The engine uses a latent factor approach to estimate "Fair Value" and detect anomalies:
 
----
+*   **Factorial Spread Model**: Spreads are modeled as a combination of market trends, sector-specific movements, and idiosyncratic risk:  
+    $Spread_{i,t} = Base + \beta_i \cdot Market_t + Sector_{s,t} + \epsilon_{i,t}$
+*   **Matrix Factorization (SVD)**: The engine utilizes **Singular Value Decomposition** to decompose the sparse spread matrix into latent factors. By reconstructing the matrix, it captures the underlying market structure to fill missing values (NaNs).
+*   **Relative Value Strategy**: The model identifies alpha opportunities through Rich/Cheap analysis. If the deviation between the market spread and the SVD-reconstructed Fair Value exceeds a defined threshold, a signal is generated (Buy for undervalued bonds, Sell for overvalued ones).
 
-## Stack Technique
+### 3. Project Structure
 
-*   **Langage :** Python 3.x
-*   **Data Science :** `pandas`, `numpy`, `scikit-learn`
-*   **Visualisation :** `matplotlib`, `seaborn`
-*   **Configuration :** `pyyaml`
+The repository is organized following professional modular standards:
 
----
+*   **src/data_generation.py**: Stochastic simulator creating realistic bond metadata (sectors, ratings) and synthetic spreads with configurable illiquidity rates.
+*   **src/models.py**: Implementation of the **OASImputer**, featuring a Naive baseline and an Iterative SVD-based Matrix Factorization algorithm.
+*   **src/evaluation.py**: Analytical module for backtesting accuracy via RMSE, segmented by industry sector and credit rating.
+*   **src/trading_strategy.py**: Signal generation engine for identifying top Buy/Sell opportunities.
+*   **config/settings.yaml**: Centralized configuration for market parameters and model hyperparameters.
 
-## Structure du Projet
+### 4. Implementation Details
 
-```text
-├── config/
-│   └── settings.yaml          # Paramètres de simulation et du modèle
-├── src/
-│   ├── data_generation.py     # Moteur de simulation de spreads OAS
-│   ├── models.py              # Imputers (Naïf et Matrix Factorization)
-│   ├── evaluation.py          # Métriques de performance (RMSE par secteur/rating)
-│   └── trading_strategy.py    # Générateur de signaux Rich/Cheap
-├── notebooks/
-│   └── analysis.ipynb         # Démonstration complète et visualisations
-├── main.py                    # Script d'exécution principal
-└── README.md
-```
+*   **Language**: Python 3.x
+*   **Libraries**: `scikit-learn` (TruncatedSVD) for matrix decomposition, `pandas` & `numpy` for vectorized operations, `matplotlib` & `seaborn` for financial visualization.
+*   **Architecture**: Object-Oriented Programming (OOP) to ensure modularity and easy integration of alternative models (e.g., KNN or Deep Learning Autoencoders).
 
----
+**Career Objective**: Aspiring Quantitative Researcher / Developer. Currently seeking an internship in Quantitative Finance starting in Fall 2026.
 
-## Méthodologie
-
-### 1. Modèle de Génération des Données
-Les spreads sont simulés selon un modèle factoriel :
-$$Spread_{i,t} = Base + \beta_i \cdot Mkt_t + Sector_{s,t} + \epsilon_{i,t}$$
-L'illiquidité est introduite en supprimant aléatoirement un pourcentage défini de données (par défaut **75% de données manquantes**).
-
-### 2. Algorithme d'Imputation : SVD Itérative
-Plutôt qu'un simple remplissage moyen, le modèle utilise une **Décomposition en Valeurs Singulières (SVD)** :
-*   Il réduit la dimension de la matrice des spreads pour identifier les thèmes cachés (facteurs latents).
-*   Il reconstruit la matrice complète à partir de ces facteurs.
-*   Le processus est itéré pour affiner la précision de la Fair Value.
-
-### 3. Stratégie Relative Value
-*   **Signal d'Achat (CHEAP) :** OAS Marché > Fair Value + Seuil.
-*   **Signal de Vente (RICH) :** OAS Marché < Fair Value - Seuil.
-
----
-
-## Installation et Utilisation
-
-### Installation
-```bash
-git clone https://github.com/CavaleriMaeva-Engineering/Fixed-Income-ML-Imputation.git
-cd Fixed-Income-ML-Imputation
-pip install -r requirements.txt
-```
-
-### Exécution du projet
-Pour lancer la simulation complète et voir les résultats :
-```bash
-python main.py
-```
-
----
-
-## Résultats & Visualisations
-
-Le projet génère des analyses graphiques permettant de juger de la qualité de la reconstruction :
-*   **Visualisation de l'illiquidité :** Heatmaps des données manquantes.
-*   **Reconstruction de courbe :** Comparaison entre la Vraie Valeur (cachée), les données observées et la prédiction du modèle.
-*   **Analyse d'erreur :** RMSE décomposé par secteur industriel et par notation de crédit (Rating).
-
----
-
-## Configuration
-Vous pouvez modifier les paramètres du marché ou de l'IA dans le fichier `config/settings.yaml` :
-```yaml
-simulation:
-  n_bonds: 300
-  n_days: 500
-illiquidity:
-  missing_rate: 0.75  # 75% de trous
-model:
-  n_factors: 15       # Nombre de facteurs latents pour la SVD
-```
+**Contact**: Maéva Cavaleri - cavalerimaeva@gmail.com
